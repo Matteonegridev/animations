@@ -1,5 +1,11 @@
+import Animation from "./animations/Script";
+
 function App() {
-  return <div>Hello</div>;
+  return (
+    <div>
+      <Animation />
+    </div>
+  );
 }
 
 export default App;
