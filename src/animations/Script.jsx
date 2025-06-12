@@ -18,8 +18,58 @@ function Animation() {
     camera.position.set(0, 0, 5);
     scene.add(camera);
 
+    // TEXTURES
+    const textureLoader = new THREE.TextureLoader();
+    const floorFog = textureLoader.load("./assets/floor/alpha.jpg");
+
+    // floor textures:
+    const floorRockColorTexture = textureLoader.load(
+      "./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.jpg"
+    );
+    const floorRockNormalTexture = textureLoader.load(
+      "./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.jpg"
+    );
+    const floorRockARMTexture = textureLoader.load(
+      "./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.jpg"
+    );
+    const floorRockDisplacementTexture = textureLoader.load(
+      "./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.jpg"
+    );
+    const doorTexture = textureLoader.load("./assets/door/color.webp");
+    floorRockColorTexture.colorSpace = THREE.SRGBColorSpace;
+
+    floorRockColorTexture.repeat.set(8, 8);
+    floorRockARMTexture.repeat.set(8, 8);
+    floorRockDisplacementTexture.repeat.set(8, 8);
+    floorRockNormalTexture.repeat.set(8, 8);
+
+    floorRockColorTexture.wrapS = THREE.RepeatWrapping;
+    floorRockColorTexture.wrapT = THREE.RepeatWrapping;
+    floorRockNormalTexture.wrapS = THREE.RepeatWrapping;
+    floorRockNormalTexture.wrapT = THREE.RepeatWrapping;
+    floorRockARMTexture.wrapS = THREE.RepeatWrapping;
+    floorRockARMTexture.wrapT = THREE.RepeatWrapping;
+    floorRockDisplacementTexture.wrapS = THREE.RepeatWrapping;
+    floorRockDisplacementTexture.wrapT = THREE.RepeatWrapping;
+
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+
     // GEOMETRY
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial());
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(20, 20, 100, 100),
+      new THREE.MeshStandardMaterial({
+        alphaMap: floorFog,
+        transparent: true,
+        map: floorRockColorTexture,
+        aoMap: floorRockARMTexture,
+        roughnessMap: floorRockARMTexture,
+        metalnessMap: floorRockARMTexture,
+        normalMap: floorRockNormalTexture,
+        displacementMap: floorRockDisplacementTexture,
+        displacementScale: 0.3,
+        displacementBias: -0.2,
+      })
+    );
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
@@ -42,7 +92,7 @@ function Animation() {
     house.add(roof);
 
     // DOOR
-    const door = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2), new THREE.MeshStandardMaterial());
+    const door = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2), new THREE.MeshStandardMaterial({ map: doorTexture }));
     door.position.y = 1;
     door.position.z = 2 + 0.01;
     house.add(door);
