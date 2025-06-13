@@ -20,6 +20,8 @@ function Animation() {
 
     // TEXTURES
     const textureLoader = new THREE.TextureLoader();
+
+    // fog texture:
     const floorFog = textureLoader.load("./assets/floor/alpha.jpg");
 
     // floor textures:
@@ -35,7 +37,7 @@ function Animation() {
     const floorRockDisplacementTexture = textureLoader.load(
       "./assets/floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.jpg"
     );
-    const doorTexture = textureLoader.load("./assets/door/color.webp");
+
     floorRockColorTexture.colorSpace = THREE.SRGBColorSpace;
 
     floorRockColorTexture.repeat.set(8, 8);
@@ -52,7 +54,27 @@ function Animation() {
     floorRockDisplacementTexture.wrapS = THREE.RepeatWrapping;
     floorRockDisplacementTexture.wrapT = THREE.RepeatWrapping;
 
+    // door texture:
+    const doorTexture = textureLoader.load("./assets/door/color.jpg");
     doorTexture.colorSpace = THREE.SRGBColorSpace;
+    const doorAlphaTexture = textureLoader.load("./assets/door/alpha.jpg");
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+    const doorHeightTexture = textureLoader.load("./assets/door/height.jpg");
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+    const doorAoTexture = textureLoader.load("./assets/door/ambientOcclusion.jpg");
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+    const doorMetalnessTexture = textureLoader.load("./assets/door/metalness.jpg");
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+    const doorNormalTexture = textureLoader.load("./assets/door/normal.jpg");
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+    const doorRoughnessTexture = textureLoader.load("./assets/door/roughness.jpg");
+    doorTexture.colorSpace = THREE.SRGBColorSpace;
+
+    // wall texure:
+    const wallColorTexure = textureLoader.load("./assets/wall/castle_brick_broken_06_diff_1k.jpg");
+    wallColorTexure.colorSpace = THREE.SRGBColorSpace;
+    const wallARMTexure = textureLoader.load("./assets/wall/castle_brick_broken_06_arm_1k.jpg");
+    const wallNormalTexure = textureLoader.load("./assets/wall/castle_brick_broken_06_nor_gl_1k.jpg");
 
     // GEOMETRY
     const floor = new THREE.Mesh(
@@ -78,7 +100,16 @@ function Animation() {
     scene.add(house);
 
     // WALLS
-    const walls = new THREE.Mesh(new THREE.BoxGeometry(4, 2.5, 4), new THREE.MeshStandardMaterial({ color: 0xffff00 }));
+    const walls = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 2.5, 4),
+      new THREE.MeshStandardMaterial({
+        map: wallColorTexure,
+        aoMap: wallARMTexure,
+        metalnessMap: wallARMTexure,
+        roughnessMap: wallARMTexure,
+        normalMap: wallNormalTexure,
+      })
+    );
     walls.position.y = 1.25;
     house.add(walls);
 
@@ -92,7 +123,17 @@ function Animation() {
     house.add(roof);
 
     // DOOR
-    const door = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2), new THREE.MeshStandardMaterial({ map: doorTexture }));
+    const door = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.5, 2),
+      new THREE.MeshStandardMaterial({
+        map: doorTexture,
+        alphaMap: doorAlphaTexture,
+        transparent: true,
+        metalnessMap: doorMetalnessTexture,
+        roughnessMap: doorRoughnessTexture,
+        normalMap: doorNormalTexture,
+      })
+    );
     door.position.y = 1;
     door.position.z = 2 + 0.01;
     house.add(door);
