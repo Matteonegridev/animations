@@ -243,8 +243,19 @@ function Animation() {
     }
 
     // LIGHT
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // ambient light:
+    const ambientLight = new THREE.AmbientLight(0x86cdff, 0.275);
     scene.add(ambientLight);
+    // directional light:
+    const directionalLight = new THREE.DirectionalLight(0x86cdff, 1);
+    directionalLight.position.set(10, 8, -8);
+    const dirLightCameraHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+    scene.add(dirLightCameraHelper);
+    scene.add(directionalLight);
+    // door light :
+    const doorLight = new THREE.PointLight(0xff7d46, 2);
+    doorLight.position.set(0, 2.2, 2.5);
+    house.add(doorLight);
 
     const controls = new OrbitControls(camera, canvas.current);
 
