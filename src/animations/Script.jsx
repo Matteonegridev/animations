@@ -3,6 +3,8 @@ import { OrbitControls } from "three/examples/jsm/Addons.js";
 import * as THREE from "three";
 import "./script.css";
 import { degToRad } from "three/src/math/MathUtils.js";
+import { Timer } from "three/addons/misc/Timer.js";
+import { Sky } from "three/addons/objects/Sky.js";
 
 function Animation() {
   const canvas = useRef(null);
@@ -17,6 +19,10 @@ function Animation() {
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(0, 0, 5);
     scene.add(camera);
+
+    // RENDER
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas.current });
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
     // TEXTURES
     const textureLoader = new THREE.TextureLoader();
@@ -242,14 +248,23 @@ function Animation() {
       gravesGroup.add(grave);
     }
 
+    // GHOST
+    const ghost1 = new THREE.PointLight(0x8800ff, 6);
+    const ghost2 = new THREE.PointLight(0xff0088, 6);
+    const ghost3 = new THREE.PointLight(0xff0000, 6);
+    scene.add(ghost1);
+    scene.add(ghost2);
+    scene.add(ghost3);
+
     // LIGHT
     // ambient light:
-    const ambientLight = new THREE.AmbientLight(0x86cdff, 0.275);
+    const ambientLight = new THREE.AmbientLight(0x86cdff, 0.175);
     scene.add(ambientLight);
     // directional light:
     const directionalLight = new THREE.DirectionalLight(0x86cdff, 1);
     directionalLight.position.set(10, 8, -8);
     const dirLightCameraHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+    dirLightCameraHelper.visible = false;
     scene.add(dirLightCameraHelper);
     scene.add(directionalLight);
     // door light :
@@ -257,17 +272,87 @@ function Animation() {
     doorLight.position.set(0, 2.2, 2.5);
     house.add(doorLight);
 
+    // SHADOWS
+    // initiate shadows:
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // cast and receive shadows:
+    directionalLight.castShadow = true;
+    ghost1.castShadow = true;
+    ghost2.castShadow = true;
+    ghost3.castShadow = true;
+    walls.castShadow = true;
+    walls.receiveShadow = true;
+    roof.castShadow = true;
+    floor.receiveShadow = true;
+    console.log(gravesGroup);
+    gravesGroup.children.forEach((grave) => {
+      grave.castShadow = true;
+      grave.receiveShadow = true;
+    });
+    // mapping shadows:
+    directionalLight.shadow.mapSize.width = 256;
+    directionalLight.shadow.mapSize.height = 256;
+    directionalLight.shadow.camera.top = 8;
+    directionalLight.shadow.camera.right = 8;
+    directionalLight.shadow.camera.bottom = -8;
+    directionalLight.shadow.camera.left = -8;
+    directionalLight.shadow.camera.near = 1;
+    directionalLight.shadow.camera.far = 20;
+
+    ghost1.shadow.mapSize.width = 256;
+    ghost1.shadow.mapSize.height = 256;
+    ghost1.shadow.camera.far = 10;
+    ghost2.shadow.mapSize.width = 256;
+    ghost2.shadow.mapSize.height = 256;
+    ghost2.shadow.camera.far = 10;
+    ghost3.shadow.mapSize.width = 256;
+    ghost3.shadow.mapSize.height = 256;
+    ghost3.shadow.camera.far = 10;
+    ////////////////////////////////////////////
+
+    // SKY
+    // we import it from threejs addons:
+    const sky = new Sky();
+    sky.scale.setScalar(100);
+    scene.add(sky);
+    sky.material.uniforms["turbidity"].value = 10;
+    sky.material.uniforms["rayleigh"].value = 3;
+    sky.material.uniforms["mieCoefficient"].value = 0.1;
+    sky.material.uniforms["mieDirectionalG"].value = 0.95;
+    sky.material.uniforms["sunPosition"].value.set(0.3, -0.038, -0.95);
+
+    // FOG
+    scene.fog = new THREE.FogExp2(0x04343f, 0.1);
+
     const controls = new OrbitControls(camera, canvas.current);
 
+    // INITIATE CLOCK FOR ANIMATION:
+    const timer = new Timer();
+
     const animate = () => {
+      timer.update();
+      const elapsedTime = timer.getElapsed();
+
+      const ghost1Angle = elapsedTime * 0.5;
+      ghost1.position.x = Math.cos(ghost1Angle) * 4;
+      ghost1.position.z = Math.sin(ghost1Angle) * 4;
+      ghost1.position.y = Math.sin(ghost1Angle * 2.34) * Math.sin(ghost1Angle * 3.34) * 4;
+
+      const ghost2Angle = -elapsedTime * 0.38;
+      ghost2.position.x = Math.cos(ghost2Angle) * 5;
+      ghost2.position.z = Math.sin(ghost2Angle) * 5;
+      ghost2.position.y = Math.sin(ghost2Angle * 2.34) * Math.sin(ghost2Angle * 3.34) * 5;
+
+      const ghost3Angle = elapsedTime * 0.23;
+      ghost2.position.x = Math.cos(ghost3Angle) * 6;
+      ghost2.position.z = Math.sin(ghost3Angle) * 6;
+      ghost2.position.y = Math.sin(ghost3Angle * 2.34) * Math.sin(ghost3Angle * 3.34) * 6;
+
       requestAnimationFrame(animate);
       controls.update();
       renderer.render(scene, camera);
     };
-
-    // RENDER
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas.current });
-    renderer.setSize(window.innerWidth, window.innerHeight);
 
     animate();
   });
